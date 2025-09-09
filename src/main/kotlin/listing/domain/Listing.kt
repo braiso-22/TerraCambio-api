@@ -4,10 +4,11 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 data class Listing @OptIn(ExperimentalUuidApi::class) constructor(
-    val id: Uuid,
+    val id: ListingId,
     val name: String,
     val listingTypes: Set<ListingType>,
-    val geolocation: Location
+    val geolocation: Location,
+    val ownerId: OwnerId
 ) {
     init {
         require(name.isNotBlank()) { "Listing name must not be blank" }
@@ -15,6 +16,11 @@ data class Listing @OptIn(ExperimentalUuidApi::class) constructor(
     }
 }
 
+@JvmInline
+value class ListingId @OptIn(ExperimentalUuidApi::class) constructor(val value: Uuid)
+
+@JvmInline
+value class OwnerId @OptIn(ExperimentalUuidApi::class) constructor(val value: Uuid)
 
 sealed interface ListingType {
     data class Buy(val value: Money) : ListingType
@@ -58,5 +64,12 @@ value class Longitude(val value: Double) {
     init {
         require(value.isFinite()) { "Longitude must be a finite number" }
         require(value in -180.0..180.0) { "Longitude must be in range [-180.0, 180.0]" }
+    }
+}
+
+@JvmInline
+value class CadastralCode(val value: String) {
+    init {
+        require(value.length == 14) { "Cadastral code length must be of 14" }
     }
 }

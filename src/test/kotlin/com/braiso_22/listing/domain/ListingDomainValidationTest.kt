@@ -69,29 +69,31 @@ class ListingDomainValidationTest {
     @OptIn(ExperimentalUuidApi::class)
     @Test
     fun `listing requires non-blank name and at least one type`() {
-        val id = Uuid.random()
+        val id = ListingId(Uuid.random())
+        val owner = OwnerId(Uuid.random())
         val loc = Location(GeoLocation(Latitude(0.0), Longitude(0.0)), name = "Earth")
         // valid
-        Listing(id = id, name = "Nice listing", listingTypes = setOf(ListingType.Switch), geolocation = loc)
+        Listing(id = id, name = "Nice listing", listingTypes = setOf(ListingType.Switch), geolocation = loc, ownerId = owner)
 
         // blank name
         assertFailsWith<IllegalArgumentException> {
-            Listing(id = id, name = "\t\n  ", listingTypes = setOf(ListingType.Switch), geolocation = loc)
+            Listing(id = id, name = "\t\n  ", listingTypes = setOf(ListingType.Switch), geolocation = loc, ownerId = owner)
         }
         // no types
         assertFailsWith<IllegalArgumentException> {
-            Listing(id = id, name = "Nice listing", listingTypes = emptySet(), geolocation = loc)
+            Listing(id = id, name = "Nice listing", listingTypes = emptySet(), geolocation = loc, ownerId = owner)
         }
     }
 
     @OptIn(ExperimentalUuidApi::class)
     @Test
     fun `listing buy and rent accept non-negative money`() {
-        val id = Uuid.random()
+        val id = ListingId(Uuid.random())
+        val owner = OwnerId(Uuid.random())
         val loc = Location(GeoLocation(Latitude(0.0), Longitude(0.0)), name = "Earth")
         val buy = ListingType.Buy(Money(1999))
         val rent = ListingType.Rent(Money(0))
-        val l = Listing(id = id, name = "With price", listingTypes = setOf(buy, rent), geolocation = loc)
+        val l = Listing(id = id, name = "With price", listingTypes = setOf(buy, rent), geolocation = loc, ownerId = owner)
         assertEquals(2, l.listingTypes.size)
     }
 
