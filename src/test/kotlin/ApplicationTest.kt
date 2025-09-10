@@ -1,5 +1,4 @@
-package com.braiso_22
-
+import com.braiso_22.module
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
@@ -14,6 +13,9 @@ class ApplicationTest {
             module()
         }
         client.get("/").apply {
+            assertEquals(HttpStatusCode.OK, status)
+        }
+        client.get("/json/kotlinx-serialization").apply {
             assertEquals(HttpStatusCode.OK, status)
         }
     }

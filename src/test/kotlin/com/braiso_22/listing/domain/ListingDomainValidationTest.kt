@@ -79,7 +79,7 @@ class ListingDomainValidationTest {
             id = id,
             name = name,
             listingTypes = setOf(ListingType.Switch),
-            geolocation = loc,
+            location = loc,
             ownerId = owner
         )
 
@@ -89,13 +89,13 @@ class ListingDomainValidationTest {
                 id = id,
                 name = ListingName("\t\n  "),
                 listingTypes = setOf(ListingType.Switch),
-                geolocation = loc,
+                location = loc,
                 ownerId = owner
             )
         }
         // no types
         assertFailsWith<IllegalArgumentException> {
-            Listing(id = id, name = name, listingTypes = emptySet(), geolocation = loc, ownerId = owner)
+            Listing(id = id, name = name, listingTypes = emptySet(), location = loc, ownerId = owner)
         }
     }
 
@@ -109,7 +109,7 @@ class ListingDomainValidationTest {
         val buy = ListingType.Buy(Money(1999))
         val rent = ListingType.Rent(Money(0))
         val l =
-            Listing(id = id, name = name, listingTypes = setOf(buy, rent), geolocation = loc, ownerId = owner)
+            Listing(id = id, name = name, listingTypes = setOf(buy, rent), location = loc, ownerId = owner)
         assertEquals(2, l.listingTypes.size)
     }
 

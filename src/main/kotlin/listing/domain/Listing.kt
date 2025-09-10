@@ -8,7 +8,7 @@ data class Listing @OptIn(ExperimentalUuidApi::class) constructor(
     val id: ListingId,
     val name: ListingName,
     val listingTypes: Set<ListingType>,
-    val geolocation: Location,
+    val location: Location,
     val ownerId: OwnerId
 ) {
     init {

@@ -5,10 +5,9 @@ import com.braiso_22.listing.domain.vo.ListingName
 import com.braiso_22.listing.domain.vo.ListingType
 import com.braiso_22.listing.domain.vo.OwnerId
 
-
 data class AddListingCommand(
     val id: OwnerId,
     val listingName: ListingName,
-    val type: ListingType,
+    val types: Set<ListingType>,
     val cadastralCode: CadastralCode
 )
