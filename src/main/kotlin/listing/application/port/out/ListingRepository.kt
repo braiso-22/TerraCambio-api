@@ -1,7 +1,7 @@
 package com.braiso_22.listing.application.port.out
 
 import com.braiso_22.listing.domain.Listing
-import com.braiso_22.listing.domain.OwnerId
+import com.braiso_22.listing.domain.vo.OwnerId
 
 interface ListingRepository {
     suspend fun add(listing: Listing)
