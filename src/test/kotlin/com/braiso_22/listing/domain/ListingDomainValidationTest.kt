@@ -1,6 +1,10 @@
 package com.braiso_22.listing.domain
 
-import com.braiso_22.listing.domain.vo.*
+import com.braiso_22.listing.domain.vo.ListingTransactions
+import com.braiso_22.listing.domain.vo.Location
+import com.braiso_22.listing.domain.vo.TransactionType
+import listing.domain.Listing
+import listing.domain.vo.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

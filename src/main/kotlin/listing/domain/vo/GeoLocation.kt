@@ -1,4 +1,4 @@
-package com.braiso_22.listing.domain.vo
+package listing.domain.vo
 
 data class GeoLocation(
     val latitude: Latitude,

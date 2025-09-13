@@ -1,4 +1,4 @@
-package com.braiso_22.listing.domain.vo
+package listing.domain.vo
 
 @JvmInline
 value class ListingName(val value: String) {

@@ -1,13 +1,13 @@
-package com.braiso_22.listing.application.port.`in`.addListing
+package listing.application.port.`in`.addListing
 
-import com.braiso_22.listing.application.port.out.LocationProvider
-import com.braiso_22.listing.application.port.out.ListingRepository
-import com.braiso_22.listing.domain.Listing
-import com.braiso_22.listing.domain.vo.CadastralCode
-import com.braiso_22.listing.domain.vo.ListingId
-import com.braiso_22.listing.domain.vo.ListingName
 import com.braiso_22.listing.domain.vo.ListingTransactions
-import com.braiso_22.listing.domain.vo.OwnerId
+import listing.application.port.out.ListingRepository
+import listing.application.port.out.LocationProvider
+import listing.domain.Listing
+import listing.domain.vo.CadastralCode
+import listing.domain.vo.ListingId
+import listing.domain.vo.ListingName
+import listing.domain.vo.OwnerId
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

@@ -1,9 +1,9 @@
-package com.braiso_22.listing.application.port.`in`.addListing
+package listing.application.port.`in`.addListing
 
-import com.braiso_22.listing.domain.vo.Money
+import listing.domain.vo.Money
 import com.braiso_22.listing.domain.vo.TransactionType
 
-data class AddListingCommand constructor(
+data class AddListingCommand (
     val id: String,
     val listingName: String,
     val types: List<CommandListingTransaction>,
@@ -12,22 +12,22 @@ data class AddListingCommand constructor(
 
 data class CommandListingTransaction(
     val type: CommandTransactionType,
-    val value: Long? = null
+    val cents: Long? = null
 ) {
     fun toListingType(): TransactionType {
         return when (type) {
             CommandTransactionType.BUY -> {
-                require(value != null) {
-                    "Value must be provided for BUY listing type"
+                require(cents != null) {
+                    "Cents must be provided for BUY listing type"
                 }
-                TransactionType.Buy(Money(value))
+                TransactionType.Buy(Money(cents))
             }
 
             CommandTransactionType.RENT -> {
-                require(value != null) {
-                    "Value must be provided for RENT listing type"
+                require(cents != null) {
+                    "Cents must be provided for RENT listing type"
                 }
-                TransactionType.Rent(Money(value))
+                TransactionType.Rent(Money(cents))
             }
 
             CommandTransactionType.SWITCH -> {

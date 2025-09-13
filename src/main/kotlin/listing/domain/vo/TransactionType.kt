@@ -1,5 +1,7 @@
 package com.braiso_22.listing.domain.vo
 
+import listing.domain.vo.Money
+
 sealed interface TransactionType {
     data class Buy(val value: Money) : TransactionType
     data class Rent(val value: Money) : TransactionType
