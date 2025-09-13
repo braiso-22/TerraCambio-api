@@ -1,7 +1,1 @@
-rootProject.name = "terracambio-api"
-
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-    }
-}
+rootProject.name = "terracambio_api"

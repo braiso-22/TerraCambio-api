@@ -1,25 +1,44 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.kotlin.plugin.spring)
+    alias(libs.plugins.spring.framework.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
 
 group = "com.braiso_22"
-version = "0.0.1"
+version = "0.0.1-SNAPSHOT"
+description = "Api for terracambio project"
 
-application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.host.common)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.server.swagger)
-    implementation(libs.ktor.server.netty)
-    implementation(libs.logback.classic)
-    implementation(libs.ktor.server.config.yaml)
-    testImplementation(libs.ktor.server.test.host)
+    //implementation(libs.springboot.starter.security)
+    implementation(libs.springboot.starter.web)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.spring.doc.openapi)
+    developmentOnly(libs.springboot.dev.tools)
+    testImplementation(libs.springboot.starter.test)
     testImplementation(libs.kotlin.test.junit)
+    //testImplementation(libs.spring.security.test)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
