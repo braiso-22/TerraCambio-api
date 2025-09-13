@@ -1,108 +1,114 @@
 # TerraCambio — Development Guidelines
 
-This document collects project-specific knowledge for TerraCambio (Ktor, Kotlin, Gradle). It is intended for advanced developers contributing to this codebase.
+This document collects project-specific knowledge for TerraCambio (Spring Boot, Kotlin, Gradle). It is intended for advanced developers contributing to this codebase.
 
 ## 1) Build and Configuration
 
-- Build tool: Gradle (Kotlin DSL). Primary entry points:
-  - Application main: `io.ktor.server.netty.EngineMain`
-  - Ktor module: `com.braiso_22.Application.module`
+- Build tool: Gradle (Kotlin DSL). Primary entry point:
+  - Spring Boot application main: `com.braiso_22.terracambio_api.TerracambioApiApplication` (function `main`)
 - Plugins and versions are managed via `gradle/libs.versions.toml`:
   - Kotlin: 2.1.10
-  - Ktor: 3.2.3
-  - Logback: 1.4.14
-- Core dependencies (see `build.gradle.kts`): ktor-server-core, content-negotiation, kotlinx-json, swagger, netty, config-yaml, and logback. Tests use `ktor-server-test-host` and `kotlin-test-junit`.
+  - Spring Boot: 3.5.5
+  - Spring Dependency Management: 1.1.7
+  - springdoc-openapi: 2.8.13
+- Core dependencies (see `build.gradle.kts`):
+  - `org.springframework.boot:spring-boot-starter-web`
+  - `com.fasterxml.jackson.module:jackson-module-kotlin`
+  - `org.jetbrains.kotlin:kotlin-reflect`
+  - `org.springdoc:springdoc-openapi-starter-webmvc-ui`
+  - Tests use `spring-boot-starter-test` and `kotlin-test-junit`.
 
 Build commands (run from project root):
 - Windows PowerShell/CMD:
   - Run tests: `gradlew.bat test`
   - Build: `gradlew.bat build`
-  - Run dev server: `gradlew.bat run`
+  - Run dev server: `gradlew.bat bootRun`
 - Unix-like environments:
   - Run tests: `./gradlew test`
   - Build: `./gradlew build`
-  - Run dev server: `./gradlew run`
+  - Run dev server: `./gradlew bootRun`
 
 Server configuration:
-- `src/main/resources/application.yaml` is loaded via `ktor-server-config-yaml`. Defaults expected by Ktor Generator apply (host/port, dev profile, etc.). Netty EngineMain uses this file by default; the `Application.module` function wires Ktor features: serialization, HTTP, and routing.
-- Logging: `src/main/resources/logback.xml`.
-- Static resources are served from `src/main/resources/static` under `/static`.
-- Swagger: Plugin is available; consult `Routing.kt` and `documentation.yaml` under `resources/openapi` if you add Swagger routes.
+- `src/main/resources/application.properties` controls app settings (server port, etc.). Default port is 8080 unless overridden.
+- Component scanning: `@ComponentScan("listing")` is set in `TerracambioApiApplication` to pick up Listing features.
+- Logging: Spring Boot’s default logging (Logback) is used; customize with `logback-spring.xml` if needed.
+- Static resources (if any) are served from `src/main/resources/static` under `/` by Spring Boot static resource mappings.
+- OpenAPI/Swagger UI via springdoc: accessible at `/swagger-ui/index.html` once the server is running.
 
 Notes:
-- The `settings.gradle.kts` and `gradle.properties` follow standard Ktor template conventions; nothing custom to change for local dev beyond typical JDK setup (JDK 17+ recommended for Ktor 3.x).
+- JDK 17 is configured via Gradle toolchain and is recommended for Spring Boot 3.x.
+- The project description and version are set in `build.gradle.kts`.
 
 ## 2) Testing
 
 Frameworks:
-- Ktor Test Host (`io.ktor:ktor-server-test-host`) for in-memory application testing.
-- Kotlin Test (JUnit 4 adapter) via `kotlin-test-junit`.
+- Spring Boot Test (`org.springframework.boot:spring-boot-starter-test`) with JUnit Platform (JUnit 5).
+- Kotlin Test (JUnit 4 compatibility artifacts may also be present via `kotlin-test-junit`). Tests run on the JUnit Platform per Gradle config.
 
-Canonical test pattern:
-- Use `testApplication { ... }` to spin up an embedded test server.
-- Call `application { module() }` to install our module configuration.
-- Use the provided HTTP client to perform requests.
-
-Example (existing): `src/test/kotlin/ApplicationTest.kt`
-- Verifies `GET /` returns 200.
+Canonical test patterns:
+- Application context smoke test: see `src/test/kotlin/com/braiso_22/terracambio_api/TerracambioApiApplicationTests.kt`.
+- Domain/unit tests: see `src/test/kotlin/com/braiso_22/listing/domain/ListingDomainValidationTest.kt`.
 
 Running tests:
 - All tests: `gradlew.bat test` (Windows) or `./gradlew test` (Unix)
-- One test class by FQN: e.g., `./gradlew test --tests com.braiso_22.ApplicationTest`
-- One test method: `./gradlew test --tests "com.braiso_22.ApplicationTest.testRoot"`
+- One test class by FQN: e.g., `./gradlew test --tests com.braiso_22.terracambio_api.TerracambioApiApplicationTests`
+- One test method: `./gradlew test --tests "com.braiso_22.terracambio_api.TerracambioApiApplicationTests.contextLoads"`
 
 Add a new test:
 - Create a file under `src/test/kotlin` in the appropriate package (e.g., `com.braiso_22`).
-- Template snippet:
-  
+- Example Spring Boot test snippet:
+
   ```kotlin
+  @org.springframework.boot.test.context.SpringBootTest
   class ExampleTest {
-      @Test
-      fun `smoke root`() = testApplication {
-          application { module() }
-          val res = client.get("/")
-          assertEquals(HttpStatusCode.OK, res.status)
+      @org.junit.jupiter.api.Test
+      fun contextLoads() {
+          // add assertions for your beans/services
       }
   }
   ```
 
-Demonstrated test run (validated locally during preparation of this document):
-- We temporarily added a `GuidelinesSmokeTest` using the above pattern and ran it with:
-  - `./gradlew test --tests com.braiso_22.GuidelinesSmokeTest` (Unix) or `gradlew.bat test --tests com.braiso_22.GuidelinesSmokeTest` (Windows)
-- The test passed and was then removed to keep the repository unchanged except for this guidelines file.
-
 Troubleshooting:
-- Unresolved reference `get` in tests: ensure `import io.ktor.client.request.*` is present when calling `client.get("…")`.
-- If binding to the HTTP port fails in integration scenarios, prefer Ktor Test Host (as above) rather than starting a real Netty server in tests.
-- If serialization fails, check `configureSerialization()` in `Serialization.kt` and ensure the content negotiation plugin is installed.
+- If the context fails to start, verify `@ComponentScan("listing")` finds your beans and that constructor dependencies are satisfied.
+- For HTTP endpoint tests, you can use `@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)` and `TestRestTemplate`, or slice tests with `@WebMvcTest` for controllers.
+- If JSON serialization fails, ensure your DTOs are Kotlin-friendly (default values, nullable where appropriate) and that `jackson-module-kotlin` is on the classpath (it is).
 
 ## 3) Additional Development Notes
 
 Project layout and conventions:
-- Package root: `com.braiso_22` for the app; domain models may live under feature-specific packages, e.g., `com.braiso_22.listing.domain`.
-- Domain example provided: `Listing`, `Type`, and `Money` value class (Kotlin inline class). Keep domain models immutable; prefer Kotlin data/value classes.
-- Routing is centralized in `Routing.kt` via `fun Application.configureRouting()`. Add new routes inside `routing { … }` and keep handlers thin. Use separate files per feature if route surface grows.
-- Serialization: kotlinx.serialization with JSON. Annotate models with `@Serializable` if you plan to serialize them via Ktor (current domain types are not annotated; add as needed at the boundary).
-- Configuration-first: changes to ports, hosts, or environment should go through `application.yaml` whenever possible.
-- Logging: use slf4j facade via Logback; prefer structured logs and avoid logging sensitive data.
+- Package root for the Spring Boot app: `com.braiso_22.terracambio_api`.
+- Listing feature lives under `listing` with a hexagonal/ports-and-adapters structure (application ports, domain, and adapters).
+- HTTP API: `listing.intraestructure.adapters.in.springboot_api.ListingController` exposes endpoints, e.g., `GET /api/v1/listing` (returns a list of `ListingDto`).
+
+REST and DTOs:
+- Controllers are annotated with `@RestController` and map routes with `@RequestMapping`/`@GetMapping`/`@PostMapping`.
+- Keep controllers thin; delegate to application services (ports) when they are introduced.
+- DTOs live alongside controllers; use Jackson annotations if needed.
+
+Configuration-first:
+- Changes to ports, hosts, or environment should go through `application.properties` whenever possible.
+
+Logging:
+- Use slf4j (`LoggerFactory.getLogger(...)`). Avoid logging sensitive data.
 
 Local run tips:
-- Start server: `gradlew.bat run` (Windows) or `./gradlew run` (Unix). After startup, `GET http://localhost:8080/` should respond with "Hello World!" as implemented in `Routing.kt`.
-- Static content is under `/static` (e.g., `http://localhost:8080/static/index.html`).
+- Start server: `gradlew.bat bootRun` (Windows) or `./gradlew bootRun` (Unix).
+- After startup, try `GET http://localhost:8080/api/v1/listing` to receive a sample response from `ListingController`.
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html` (if springdoc starter is on the classpath).
 
 Code style:
-- Kotlin conventions apply. Keep functions small and pure where possible. For Ktor, group feature installation in separate `configureXxx()` functions, as already used (Serialization, HTTP, Routing). Prefer top-level functions for Ktor configuration blocks.
-- Tests: prefer `testApplication` over legacy `withTestApplication` for Ktor 3.x.
+- Kotlin conventions apply. Keep domain models immutable; prefer data/value classes.
+- For Spring, favor constructor injection and final/val properties.
 
 Release/packaging:
-- The Ktor Gradle plugin provides additional tasks such as `buildFatJar`, `buildImage`, and Docker-related tasks from the template. Use these when preparing runnable artifacts; no extra configuration is currently required.
+- Use Spring Boot’s packaging (`bootJar`) by default. Additional tasks like building an image can be configured later if needed.
 
 Security considerations:
-- Validate and sanitize input at route boundaries; configure content negotiation to fail fast on unknown properties if desired.
-- Keep `application.yaml` and `logback.xml` free of secrets. Use environment variables or externalized config when necessary.
+- Validate and sanitize input at controller boundaries.
+- Externalize secrets via environment variables or external config; keep `application.properties` free of secrets.
 
 Maintenance checklist when adding endpoints:
-- Add route in `Routing.kt` (or a new file) and unit tests in `src/test/kotlin` using Test Host.
-- If the route serializes models, annotate them with `@Serializable`.
-- Update OpenAPI under `resources/openapi/documentation.yaml` if API surface changes.
+- Add a new controller or method under `listing.intraestructure.adapters.in.springboot_api` (or a new feature package) and corresponding tests under `src/test/kotlin`.
+- If the endpoint serializes models, ensure DTOs are Jackson-compatible.
+- Update OpenAPI automatically via springdoc annotations/config, or add manual documentation if needed.
 - Add minimal logging for observability and error paths.
