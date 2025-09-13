@@ -1,6 +1,6 @@
 package listing.application.port.`in`.addListing
 
-import com.braiso_22.listing.domain.vo.ListingTransactions
+import listing.domain.vo.ListingTransactions
 import listing.application.port.out.ListingRepository
 import listing.application.port.out.LocationProvider
 import listing.domain.Listing
@@ -47,7 +47,7 @@ private class AddListingUseCase(
                 name = ListingName(command.listingName),
                 listingTransactions = ListingTransactions(command.types.map { it.toListingType() }.toSet()),
                 location = location,
-                ownerId = OwnerId(Uuid.parse(command.id))
+                ownerId = OwnerId(Uuid.parse(command.ownerId))
             )
         } catch (e: IllegalArgumentException) {
             return AddListingResult.BadCommand(e.message ?: "Invalid command parameters")

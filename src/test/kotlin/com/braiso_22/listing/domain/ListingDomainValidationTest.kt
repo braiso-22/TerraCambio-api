@@ -1,8 +1,5 @@
 package com.braiso_22.listing.domain
 
-import com.braiso_22.listing.domain.vo.ListingTransactions
-import com.braiso_22.listing.domain.vo.Location
-import com.braiso_22.listing.domain.vo.TransactionType
 import listing.domain.Listing
 import listing.domain.vo.*
 import kotlin.test.Test
@@ -65,9 +62,33 @@ class ListingDomainValidationTest {
 
     @Test
     fun `location requires non-blank name`() {
-        Location(geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)), name = "A place")
+        Location(
+            name = "A place",
+            geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)),
+            cadastralCode = CadastralCode("15009A00200071")
+        )
         assertFailsWith<IllegalArgumentException> {
-            Location(geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)), name = " ")
+            Location(
+                geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)),
+                name = " ",
+                cadastralCode = CadastralCode("15009A00200071")
+            )
+        }
+    }
+
+    @Test
+    fun `location valid cadastral code`() {
+        Location(
+            name = "A place",
+            geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)),
+            cadastralCode = CadastralCode("15009A00200071")
+        )
+        assertFailsWith<IllegalArgumentException> {
+            Location(
+                geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)),
+                name = " ",
+                cadastralCode = CadastralCode("")
+            )
         }
     }
 
@@ -77,7 +98,11 @@ class ListingDomainValidationTest {
         val id = ListingId(Uuid.random())
         val name = ListingName("Nice lising")
         val owner = OwnerId(Uuid.random())
-        val loc = Location(GeoLocation(Latitude(0.0), Longitude(0.0)), name = "Earth")
+        val loc = Location(
+            name = "Earth",
+            cadastralCode = CadastralCode("15009A00200071"),
+            geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)),
+        )
         // valid
         Listing(
             id = id,
@@ -115,7 +140,11 @@ class ListingDomainValidationTest {
         val id = ListingId(Uuid.random())
         val name = ListingName("With price")
         val owner = OwnerId(Uuid.random())
-        val loc = Location(GeoLocation(Latitude(0.0), Longitude(0.0)), name = "Earth")
+        val loc = Location(
+            geoLocation = GeoLocation(Latitude(0.0), Longitude(0.0)),
+            name = "Earth",
+            cadastralCode = CadastralCode("15009A00200071"),
+        )
         val buy = TransactionType.Buy(Money(1999))
         val rent = TransactionType.Rent(Money(0))
         val l =

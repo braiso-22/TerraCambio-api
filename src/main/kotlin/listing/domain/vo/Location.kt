@@ -1,10 +1,9 @@
-package com.braiso_22.listing.domain.vo
-
-import listing.domain.vo.GeoLocation
+package listing.domain.vo
 
 data class Location(
-    val geoLocation: GeoLocation,
     val name: String,
+    val cadastralCode: CadastralCode,
+    val geoLocation: GeoLocation,
 ) {
     init {
         require(name.isNotBlank()) { "Location name must not be blank" }

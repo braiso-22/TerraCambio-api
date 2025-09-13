@@ -1,8 +1,9 @@
 package listing.domain
 
-import com.braiso_22.listing.domain.vo.*
 import listing.domain.vo.ListingId
 import listing.domain.vo.ListingName
+import listing.domain.vo.ListingTransactions
+import listing.domain.vo.Location
 import listing.domain.vo.OwnerId
 import kotlin.uuid.ExperimentalUuidApi
 

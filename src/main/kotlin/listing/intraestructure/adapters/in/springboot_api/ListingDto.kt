@@ -1,21 +1,95 @@
 package listing.intraestructure.adapters.`in`.springboot_api
 
+import listing.domain.vo.ListingTransactions
+import listing.domain.vo.TransactionType
 import io.swagger.v3.oas.annotations.media.Schema
+import listing.application.port.`in`.CommandTransaction
+import listing.application.port.`in`.CommandTransactionType
+import listing.domain.Listing
+import listing.domain.vo.GeoLocation
 import kotlin.uuid.ExperimentalUuidApi
+
+data class CreateListingDto(
+    val listingName: String,
+    val transactions: List<TransactionDto>,
+    val cadastralCode: String,
+    val ownerId: String,
+)
 
 data class ListingDto @OptIn(ExperimentalUuidApi::class) constructor(
     @param:Schema(format = "uuid")
     val id: String,
     val listingName: String,
     val transactions: List<TransactionDto>,
-    val cadastralCode: String
+    val location: LocationDto,
+    @param:Schema(format = "uuid")
+    val ownerId: String,
 )
 
-enum class TransactionType {
+@OptIn(ExperimentalUuidApi::class)
+fun Listing.toDto(): ListingDto {
+    return ListingDto(
+        id = id.value.toHexString(),
+        listingName = name.value,
+        transactions = listingTransactions.toDto(),
+        location = LocationDto.fromDomain(location.geoLocation),
+        ownerId = ownerId.value.toHexString()
+    )
+}
+
+fun List<TransactionDto>.toCommand(): List<CommandTransaction> {
+    return this.map {  it.toCommand() }
+}
+
+fun ListingTransactions.toDto(): List<TransactionDto> {
+    return values.map {
+        when (it) {
+            is TransactionType.Buy -> TransactionDto(
+                TransactionTypeDto.BUY,
+                it.value.cents
+            )
+
+            is TransactionType.Rent -> TransactionDto(
+                TransactionTypeDto.RENT,
+                it.value.cents
+            )
+
+            TransactionType.Switch -> TransactionDto(
+                TransactionTypeDto.SWITCH,
+                null
+            )
+        }
+    }
+}
+
+data class LocationDto(
+    val latitude: Double,
+    val longitude: Double
+) {
+    companion object {
+        fun fromDomain(geoLocation: GeoLocation) = LocationDto(
+            latitude = geoLocation.latitude.value,
+            longitude = geoLocation.longitude.value
+        )
+    }
+}
+
+enum class TransactionTypeDto {
     BUY, RENT, SWITCH
 }
 
 data class TransactionDto(
-    val type: TransactionType,
+    val type: TransactionTypeDto,
     val cents: Long?
-)
+) {
+    fun toCommand(): CommandTransaction {
+        return CommandTransaction(
+            type = when (type) {
+                TransactionTypeDto.BUY -> CommandTransactionType.BUY
+                TransactionTypeDto.RENT -> CommandTransactionType.RENT
+                TransactionTypeDto.SWITCH -> CommandTransactionType.SWITCH
+            },
+            cents = cents
+        )
+    }
+}

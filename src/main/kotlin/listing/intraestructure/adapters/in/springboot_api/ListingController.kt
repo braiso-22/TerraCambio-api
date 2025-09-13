@@ -1,35 +1,61 @@
 package listing.intraestructure.adapters.`in`.springboot_api
 
+import listing.application.port.`in`.addListing.AddListing
+import listing.application.port.`in`.addListing.AddListingCommand
+import listing.application.port.`in`.addListing.AddListingResult
+import listing.application.port.`in`.getListings.GetListings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 @RestController
 @RequestMapping("/api/v1/listing")
-class ListingController {
+class ListingController(
+    private val getListings: GetListings,
+    private val addListing: AddListing,
+) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @OptIn(ExperimentalUuidApi::class)
     @GetMapping
-    fun getAllListings(): ResponseEntity<List<ListingDto>> {
+    suspend fun getAllListings(): ResponseEntity<List<ListingDto>> {
+        val listings = getListings()
 
-        logger.info("ListingController::getAllListings")
-        val list = listOf(
-            ListingDto(
-                id = Uuid.random().toHexString(),
-                listingName = "Tracy Robinson",
-                transactions = listOf(
-                    TransactionDto(TransactionType.BUY, 1000),
-                ),
-                cadastralCode = "at"
+        val dtos = listings.map { it.toDto() }
+
+        return ResponseEntity.ok(dtos)
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    @PostMapping
+    suspend fun addListing(@RequestBody dto: CreateListingDto): ResponseEntity<Any> {
+
+        logger.info("Received request to add a new listing: $dto")
+
+        val result: AddListingResult = addListing(
+            AddListingCommand(
+                ownerId = dto.ownerId,
+                listingName = dto.listingName,
+                types = dto.transactions.toCommand(),
+                cadastralCode = dto.cadastralCode,
             )
         )
 
-        return ResponseEntity.ok(list)
+        return when (result) {
+            is AddListingResult.Success -> {
+                ResponseEntity.status(HttpStatus.CREATED).build()
+            }
+
+            is AddListingResult.CadastralCodeNotFound -> {
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(result.message)
+            }
+
+            is AddListingResult.BadCommand -> {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.message)
+            }
+        }
     }
 }

@@ -21,24 +21,29 @@ repositories {
 }
 
 dependencies {
-    //implementation(libs.springboot.starter.security)
+
     implementation(libs.springboot.starter.web)
+
+    // for coroutines and flows
+    implementation(libs.springboot.starter.webflux)
+    implementation(libs.kotlin.coroutines.core)
+    implementation(libs.kotlin.coroutines.reactor)
+
+    // serialization
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.reflect)
+
+    // swagger-ui and openapi
     implementation(libs.spring.doc.openapi)
+
+
+    // testing
     developmentOnly(libs.springboot.dev.tools)
-    testImplementation(libs.springboot.starter.test)
     testImplementation(libs.kotlin.test.junit)
-    //testImplementation(libs.spring.security.test)
-    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
