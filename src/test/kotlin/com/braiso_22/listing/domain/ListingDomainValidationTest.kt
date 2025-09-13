@@ -78,7 +78,7 @@ class ListingDomainValidationTest {
         Listing(
             id = id,
             name = name,
-            listingTypes = setOf(ListingType.Switch),
+            listingTransactions = ListingTransactions(setOf(TransactionType.Switch)),
             location = loc,
             ownerId = owner
         )
@@ -88,14 +88,20 @@ class ListingDomainValidationTest {
             Listing(
                 id = id,
                 name = ListingName("\t\n  "),
-                listingTypes = setOf(ListingType.Switch),
+                listingTransactions = ListingTransactions(setOf(TransactionType.Switch)),
                 location = loc,
                 ownerId = owner
             )
         }
         // no types
         assertFailsWith<IllegalArgumentException> {
-            Listing(id = id, name = name, listingTypes = emptySet(), location = loc, ownerId = owner)
+            Listing(
+                id = id,
+                name = name,
+                listingTransactions = ListingTransactions(emptySet()),
+                location = loc,
+                ownerId = owner
+            )
         }
     }
 
@@ -106,11 +112,17 @@ class ListingDomainValidationTest {
         val name = ListingName("With price")
         val owner = OwnerId(Uuid.random())
         val loc = Location(GeoLocation(Latitude(0.0), Longitude(0.0)), name = "Earth")
-        val buy = ListingType.Buy(Money(1999))
-        val rent = ListingType.Rent(Money(0))
+        val buy = TransactionType.Buy(Money(1999))
+        val rent = TransactionType.Rent(Money(0))
         val l =
-            Listing(id = id, name = name, listingTypes = setOf(buy, rent), location = loc, ownerId = owner)
-        assertEquals(2, l.listingTypes.size)
+            Listing(
+                id = id,
+                name = name,
+                listingTransactions = ListingTransactions(setOf(buy, rent)),
+                location = loc,
+                ownerId = owner
+            )
+        assertEquals(2, l.listingTransactions.values.size)
     }
 
     @Test
