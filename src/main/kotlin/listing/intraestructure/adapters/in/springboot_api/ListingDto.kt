@@ -12,7 +12,9 @@ import kotlin.uuid.ExperimentalUuidApi
 data class CreateListingDto(
     val listingName: String,
     val transactions: List<TransactionDto>,
+    @param:Schema(minLength = 14, maxLength = 20)
     val cadastralCode: String,
+    @param:Schema(format = "uuid")
     val ownerId: String,
 )
 
@@ -38,7 +40,7 @@ fun Listing.toDto(): ListingDto {
 }
 
 fun List<TransactionDto>.toCommand(): List<CommandTransaction> {
-    return this.map {  it.toCommand() }
+    return this.map { it.toCommand() }
 }
 
 fun ListingTransactions.toDto(): List<TransactionDto> {
