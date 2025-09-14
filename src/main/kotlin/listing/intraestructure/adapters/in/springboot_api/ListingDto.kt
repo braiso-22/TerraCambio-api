@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import listing.application.port.`in`.CommandTransaction
 import listing.application.port.`in`.CommandTransactionType
 import listing.domain.Listing
-import listing.domain.vo.GeoLocation
+import listing.domain.vo.Location
 import kotlin.uuid.ExperimentalUuidApi
 
 data class CreateListingDto(
@@ -34,7 +34,7 @@ fun Listing.toDto(): ListingDto {
         id = id.value.toHexString(),
         listingName = name.value,
         transactions = listingTransactions.toDto(),
-        location = LocationDto.fromDomain(location.geoLocation),
+        location = LocationDto.fromDomain(location),
         ownerId = ownerId.value.toHexString()
     )
 }
@@ -66,13 +66,18 @@ fun ListingTransactions.toDto(): List<TransactionDto> {
 
 data class LocationDto(
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val name: String
 ) {
     companion object {
-        fun fromDomain(geoLocation: GeoLocation) = LocationDto(
-            latitude = geoLocation.latitude.value,
-            longitude = geoLocation.longitude.value
-        )
+        fun fromDomain(location: Location): LocationDto {
+            val geoLocation = location.geoLocation
+            return LocationDto(
+                latitude = geoLocation.latitude.value,
+                longitude = geoLocation.longitude.value,
+                name = location.name
+            )
+        }
     }
 }
 

@@ -4,6 +4,9 @@ import listing.application.port.`in`.addListing.AddListing
 import listing.application.port.`in`.addListing.AddListingCommand
 import listing.application.port.`in`.addListing.AddListingResult
 import listing.application.port.`in`.getListings.GetListings
+import listing.application.port.`in`.validateCadastralCode.ValidateCadastralCode
+import listing.application.port.`in`.validateCadastralCode.ValidateCadastralCodeCommand
+import listing.application.port.`in`.validateCadastralCode.ValidateCadastralCodeResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -16,6 +19,7 @@ import kotlin.uuid.ExperimentalUuidApi
 class ListingController(
     private val getListings: GetListings,
     private val addListing: AddListing,
+    private val validateCadastralCode: ValidateCadastralCode
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -27,6 +31,26 @@ class ListingController(
         val dtos = listings.map { it.toDto() }
 
         return ResponseEntity.ok(dtos)
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    @GetMapping("validate-cadastral-code/{code}")
+    suspend fun validateCadastralCode(@PathVariable code: String): ResponseEntity<Any> {
+        val codeResult = validateCadastralCode(ValidateCadastralCodeCommand(code))
+
+        return when (codeResult) {
+            is ValidateCadastralCodeResult.InvalidFormat -> {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(codeResult.message)
+            }
+
+            ValidateCadastralCodeResult.NotFound -> {
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Code not found")
+            }
+
+            ValidateCadastralCodeResult.Valid -> {
+                ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+            }
+        }
     }
 
     @OptIn(ExperimentalUuidApi::class)

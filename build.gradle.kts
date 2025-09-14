@@ -36,6 +36,14 @@ dependencies {
     // swagger-ui and openapi
     implementation(libs.spring.doc.openapi)
 
+    // ktor client
+    implementation("io.ktor:ktor-client-core:3.2.3")
+    implementation("io.ktor:ktor-client-cio:3.2.3")
+    implementation("io.ktor:ktor-client-content-negotiation:3.2.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.2.3")
+    // serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+
 
     // testing
     developmentOnly(libs.springboot.dev.tools)
