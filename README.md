@@ -1,4 +1,11 @@
-# TerraCambio API
+# ~~TerraCambio API~~
+
+## ⚠ Changed to monorepo
+
+I changed to a mono repo structure so now the server code is at [TerraCambio github](https://github.com/braiso-22/TerraCambio)
+
+
+## Old readme
 
 A Kotlin + Spring Boot API for TerraCambio. This repository contains a minimal, clean architecture-style setup (ports and adapters/hexagonal) for a Listing feature, plus Springdoc OpenAPI for interactive API docs.
 
